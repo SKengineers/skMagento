@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  magento:
+    image: bitnami/magento:latest
+    container_name: magento
+    restart: always
+    ports:
+      - "8089:8080"
+    environment:
+      - MAGENTO_HOST=localhost
+      - MAGENTO_DATABASE_HOST=db
+      - MAGENTO_DATABASE_PORT_NUMBER=3306
+      - MAGENTO_DATABASE_USER=magento
+      - MAGENTO_DATABASE_PASSWORD=magento_password
+      - MAGENTO_DATABASE_NAME=magento
+      - MAGENTO_ELASTICSEARCH_HOST=elasticsearch
+      - MAGENTO_ELASTICSEARCH_PORT_NUMBER=9200
+      - BITNAMI_DEBUG=true
+    # volumes:
+    #   - magento_data:/bitnami/magento
+    depends_on:
+      - db
+      - elasticsearch
+
+  db:
+    image: bitnami/mariadb:latest
+    container_name: magento-db
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=root_password
+      - MARIADB_DATABASE=magento
+      - MARIADB_USER=magento
+      - MARIADB_PASSWORD=magento_password
+    # volumes:
+    #   - mariadb_data:/bitnami/mariadb
+
+  elasticsearch:
+    image: bitnami/elasticsearch:latest
+    container_name: elasticsearch
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_ENABLE_SECURITY=no
+    # volumes:
+    #   - elasticsearch_data:/bitnami/elasticsearch
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: magento-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOST=db
+      - MYSQL_ROOT_PASSWORD=root_password
+    depends_on:
+      - db
+
+volumes:
+  magento_data:
+  mariadb_data:
+  elasticsearch_data:
